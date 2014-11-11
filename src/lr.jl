@@ -123,7 +123,7 @@ while !eof(f)
         println(i/1e6, "m")
         df = readtable(IOBuffer(join(raw, "")))
         probs = cat(1, probs, predict_subset(df, features, model))
-        ids   = cat(1, ids, array(df[:Id], 0))
+        ids   = cat(1, ids, array(df[:id], 0))
         println("Len Probs", length(probs))
         println("Len Ids: ", length(ids))
         raw = [header]
