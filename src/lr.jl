@@ -79,12 +79,14 @@ function log_loss(y, p)
     (y == 1) ? -log(p) : -log(1. - p)
 end
 
-raw_data_path = ARGS[1]
+raw_data_path     = ARGS[1]
+working_data_path = ARGS[2]
+
 alpha    = .1
 num_bits = 20
 model = initialize_model(num_bits, alpha)
 
-f = gzopen(joinpath(raw_data_path, "train_rev2.gz"), "r")
+f = gzopen(joinpath(raw_data_path, "train.gz"), "r")
 
 i = 0
 header = readline(f)
@@ -109,7 +111,7 @@ println("Number of training lines ", i)
 
 println("Reading test file ...")
 
-f = gzopen(joinpath(raw_data_path, "test_rev2.gz"), "r")
+f = gzopen(joinpath(raw_data_path, "test.gz"), "r")
 header = readline(f)
 raw    = [header]
 i = 0
@@ -132,5 +134,5 @@ end
 
 close(f)
 
-submission = DataFrame(Id=ids, Predicted=vec(probs))
-writetable(joinpath(raw_data_path, "submission.csv"), submission)
+submission = DataFrame(Id=ids, click=vec(probs))
+writetable(joinpath(working_data_path, "submission.csv"), submission)
