@@ -116,16 +116,17 @@ header = readline(f)
 raw    = [header]
 i = 0
 probs = Array(Float64, 0, 1)
-ids   = Array(Int,     0)
+ids   = Array(ASCIIString, 0)
 
 while !eof(f)
     i = i+1
     push!(raw, readline(f))
+    push!(ids, ASCIIString(split(raw[end], ",")[1]))
     if i%100_000==0 || eof(f)
         println(i/1e6, "m")
         df = readtable(IOBuffer(join(raw, "")))
         probs = cat(1, probs, predict_subset(df, features, model))
-        ids   = cat(1, ids, array(df[:id], 0))
+  #      ids   = cat(1, ids, array(df[:id], 0))
         println("Len Probs", length(probs))
         println("Len Ids: ", length(ids))
         raw = [header]
@@ -134,5 +135,5 @@ end
 
 close(f)
 
-submission = DataFrame(Id=ids, click=vec(probs))
+submission = DataFrame(id=[string(x) for x=ids], click=vec(probs))
 writetable(joinpath(working_data_path, "submission.csv"), submission)
