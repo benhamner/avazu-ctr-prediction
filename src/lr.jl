@@ -92,17 +92,20 @@ i = 0
 header = readline(f)
 raw    = [header]
 #features = vcat([symbol(join(["I", i])) for i=1:13], [symbol(join(["C", i])) for i=1:26])
-features = [symbol(x) for x=split(strip(header), ",")[3:end]]
-println(features)
+header_fea = [x*"-" for x=split(strip(header), ",")]
+println(header_fea)
+loss = 0
 
 while !eof(f)
     i = i+1
-    push!(raw, readline(f))
+    row = split(readline(f), ",")
+    fea = [header_fea[i]*row[i] for i=3:length(row)]
+    click = int(row[2])
+    pred = learn!(model, DataPoint(click, fea))
+    loss += log_loss(click, pred)
     if i%20_000==0 || eof(f)
-        println(i/1e6, "m")
-        df = readtable(IOBuffer(join(raw, "")))
-        learn!(model, df, features)
-        raw = [header]
+        println(i/1e6, "m", " Loss ", loss/20_000)
+        loss=0
     end
 end
 
