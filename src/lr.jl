@@ -1,4 +1,3 @@
-using DataFrames
 using GZip
 
 typealias Feature  Uint64
@@ -57,23 +56,6 @@ function learn!(model::LogisticModel, d::DataPoint)
     learn!(model, hash_features(model, d))
 end
 
-function learn!(model::LogisticModel, df::DataFrame, features)
-    loss = zeros(nrow(df))
-    for i=1:nrow(df)
-        pred = learn!(model, DataPoint(df[:click][i], [join([string(f),string(df[f][i])]) for f=features]))
-        loss[i] = log_loss(df[:click][i], pred)
-    end
-    println("Mean Loss: ", mean(loss))
-end
-
-function predict_subset(df, features, model)
-    probs = zeros(nrow(df), 1)
-    for i=1:nrow(df)
-        probs[i] = predict(model, hash_features(model, [join([string(f),string(df[f][i])]) for f=features]))
-    end
-    probs
-end
-
 function log_loss(y, p)
     p = max(min(p, 1. - 10e-12), 10e-12)
     (y == 1) ? -log(p) : -log(1. - p)
@@ -102,8 +84,8 @@ while !eof(f)
     click = int(row[2])
     pred = learn!(model, DataPoint(click, fea))
     loss += log_loss(click, pred)
-    if i%20_000==0 || eof(f)
-        println(i/1e6, "m", " Loss ", loss/20_000)
+    if i%100_000==0 || eof(f)
+        println(i/1e6, "m", " Loss ", loss/100_000)
         loss=0
     end
 end
