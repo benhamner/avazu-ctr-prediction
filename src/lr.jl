@@ -1,4 +1,4 @@
-using DataFrame
+using DataFrames
 using GZip
 
 typealias Feature  Uint64
