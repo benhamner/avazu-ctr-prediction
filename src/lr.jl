@@ -91,7 +91,6 @@ f = gzopen(joinpath(raw_data_path, "train.gz"), "r")
 i = 0
 header = readline(f)
 raw    = [header]
-#features = vcat([symbol(join(["I", i])) for i=1:13], [symbol(join(["C", i])) for i=1:26])
 header_fea = [x*"-" for x=split(strip(header), ",")]
 println(header_fea)
 loss = 0
@@ -118,21 +117,19 @@ f = gzopen(joinpath(raw_data_path, "test.gz"), "r")
 header = readline(f)
 raw    = [header]
 i = 0
-probs = Array(Float64, 0, 1)
+probs = Array(Float64, 0)
 ids   = Array(ASCIIString, 0)
 
 while !eof(f)
     i = i+1
-    push!(raw, readline(f))
-    push!(ids, ASCIIString(split(raw[end], ",")[1]))
+    row = split(readline(f), ",")
+    fea = [header_fea[i+1]*row[i] for i=2:length(row)]
+    
+    push!(ids, ASCIIString(row[1]))
+    push!(probs, predict(model, hash_features(model, fea)))
+
     if i%100_000==0 || eof(f)
         println(i/1e6, "m")
-        df = readtable(IOBuffer(join(raw, "")))
-        probs = cat(1, probs, predict_subset(df, features, model))
-  #      ids   = cat(1, ids, array(df[:id], 0))
-        println("Len Probs", length(probs))
-        println("Len Ids: ", length(ids))
-        raw = [header]
     end
 end
 
